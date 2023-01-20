@@ -6,7 +6,7 @@ import { preview } from "../assets"
 import { FormField, Loader } from "../components"
 import { getRandomPrompt } from "../utils"
 
-const API_URL = "http://localhost:6707/api/v1"
+const API_URL = import.meta.env.VITE_API_URL
 
 const CreatePost = () => {
   const navigate = useNavigate()
