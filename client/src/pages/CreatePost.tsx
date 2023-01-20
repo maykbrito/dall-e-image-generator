@@ -1,10 +1,12 @@
-import { useState } from "react"
+import { FormEvent, useState } from "react"
 import { useNavigate } from "react-router-dom"
 
 import { preview } from "../assets"
 
 import { FormField, Loader } from "../components"
 import { getRandomPrompt } from "../utils"
+
+const API_URL = "http://localhost:6707/api/v1"
 
 const CreatePost = () => {
   const navigate = useNavigate()
@@ -17,7 +19,34 @@ const CreatePost = () => {
   const [generatingImg, setGeneratingImg] = useState(false)
   const [loading, setLoading] = useState(false)
 
-  const handleSubmit = () => {}
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+
+    if (!form.prompt || !form.photo) {
+      alert("Please enter a prompt and generate some image")
+      return
+    }
+
+    try {
+      setLoading(true)
+      const response = await fetch(API_URL + "/post", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(form),
+      })
+
+      await response.json()
+      navigate("/")
+    } catch (error) {
+      alert(error)
+      console.error(error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
   const handleChange = (e: any) => {
     setForm({ ...form, [e.target.name]: e.target.value })
   }
@@ -26,11 +55,14 @@ const CreatePost = () => {
     setForm({ ...form, prompt: randomPrompt })
   }
   const generateImage = async () => {
-    if (!form.prompt) alert("Please, enter a prompt")
+    if (!form.prompt) {
+      alert("Please, enter a prompt")
+      return
+    }
 
     try {
       setGeneratingImg(true)
-      const response = await fetch("http://localhost:6707/api/v1/dalle", {
+      const response = await fetch(API_URL + "/dalle", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
