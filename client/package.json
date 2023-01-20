@@ -9,6 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@types/file-saver": "^2.0.5",
     "@types/react-router-dom": "^5.3.3",
     "autoprefixer": "^10.4.13",
     "file-saver": "^2.0.5",
