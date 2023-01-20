@@ -1,6 +1,9 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 
 import { Card, FormField, Loader } from "../components"
+import { CardProps } from "../components/Card"
+
+const API_URL = import.meta.env.VITE_API_URL
 
 interface PostProps {
   _id: string
@@ -16,7 +19,7 @@ const RenderCards = ({ data, title }: RenderCardsProps): JSX.Element => {
     return (
       <>
         {data.map((post) => (
-          <Card key={post._id} {...post} />
+          <Card key={post._id} {...(post as CardProps)} />
         ))}
       </>
     )
@@ -29,8 +32,36 @@ const RenderCards = ({ data, title }: RenderCardsProps): JSX.Element => {
 
 const Home = () => {
   const [loading, setLoading] = useState(false)
-  const [allPosts, setAllPosts] = useState(null)
+  const [allPosts, setAllPosts] = useState([])
   const [searchText, setSearchText] = useState("")
+
+  useEffect(() => {
+    const fetchPosts = async () => {
+      try {
+        setLoading(true)
+
+        const response = await fetch(API_URL + "/post", {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        })
+
+        console.log(response)
+        if (response.ok) {
+          const results = await response.json()
+          setAllPosts(results.data.reverse())
+        }
+      } catch (error) {
+        console.error(error)
+        alert(error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchPosts()
+  }, [])
 
   return (
     <section className="max-w-7xl mx-auto">
@@ -45,7 +76,14 @@ const Home = () => {
       </div>
 
       <div className="mt-16">
-        <FormField />
+        <FormField
+          labelName="Filter"
+          name="filter"
+          placeholder="filter"
+          type="text"
+          value={searchText}
+          handleChange={(e) => setSearchText(e.target.value)}
+        />
       </div>
 
       <div className="mt-10">
@@ -65,7 +103,7 @@ const Home = () => {
               {searchText ? (
                 <RenderCards data={[]} title="No search results found" />
               ) : (
-                <RenderCards data={[]} title="No posts found" />
+                <RenderCards data={allPosts} title="No posts found" />
               )}
             </div>
           </>
